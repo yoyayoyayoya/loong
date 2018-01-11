@@ -6,6 +6,13 @@
   "author": "Yoya <yoya_yoya_yoya@icloud.com>(https://github.com/yoyayoyayoya)",
   "license": "MIT",
   "keywords": ["state management", "pub/sub pattern", "model"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yoyayoyayoya/loong.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yoyayoyayoya/loong/issues"
+  },
   "scripts": {
     "build:commonjs": "cross-env NODE_ENV=cjs rollup -c -o lib/loong.js",
     "build:es": "cross-env BABEL_ENV=es NODE_ENV=es rollup -c -o es/loong.js",
