@@ -2,20 +2,15 @@ const isPromise = require('is-promise')
 
 class Subscriber {
   constructor(eventType, handler) {
-    this.name = eventType
-    this.displayName = eventType
-    this.listeners = !handler ? [] : [handler]
+    this.subscribeTotype = eventType
+    this.name = `${eventType}:Subscriber`
+    this.listeners = [handler]
   }
   addListener(handler) {
     this.listeners.push(handler)
   }
   getListeners() {
     return this.listeners
-  }
-  publish(data) {
-    for (let listener in this.listeners) {
-      listener(data)
-    }
   }
   unsubscribe(handler) {
     this.listeners = this.listeners.filter(listener => listener !== handler)
@@ -35,13 +30,22 @@ class PubSub {
     this.afterPublish = emptyFn
   }
   addHooks({ beforeSubscribe, afterSubscribe, beforePublish, afterPublish }) {
-    beforeSubscribe && (this.beforePublish = beforeSubscribe)
-    afterSubscribe && (this.beforePublish = beforeSubscribe)
-    beforePublish && (this.beforePublish = beforeSubscribe)
-    afterPublish && (this.beforePublish = beforeSubscribe)
+    beforeSubscribe && (this.beforeSubscribe = beforeSubscribe)
+    afterSubscribe && (this.afterSubscribe = afterSubscribe)
+    beforePublish && (this.beforePublish = beforePublish)
+    afterPublish && (this.afterPublish = afterPublish)
+  }
+  removeHooks() {
+    const emptyFn = () => {}
+    this.beforeSubscribe = emptyFn
+    this.afterSubscribe = emptyFn
+    this.beforePublish = emptyFn
+    this.afterPublish = emptyFn
   }
   subscribe(eventType, handler) {
-    this.beforeSubscribe(this, eventType, handler)
+    if (this.beforeSubscribe(this, eventType, handler) === false) {
+      return null
+    }
     let subscriber = this.subscribers[eventType]
     if (subscriber) {
       subscriber.addListener(handler)
@@ -51,7 +55,7 @@ class PubSub {
         handler
       )
     }
-    this.afterSubscribe()
+    this.afterSubscribe(this, eventType, handler)
     return subscriber
   }
   getSubscribers() {
@@ -67,7 +71,7 @@ class PubSub {
     }
     const listeners = subscriber.getListeners()
     let result = null
-    for (let listener in listeners) {
+    for (let listener of listeners) {
       result = listener(data)
       if (isPromise(result)) {
         result.then(d => this.afterPublish(d))
@@ -75,9 +79,6 @@ class PubSub {
         this.afterPublish(result)
       }
     }
-  }
-  publishAsync(eventType, data, postProccer) {
-    setTimeout(() => this.publish(eventType, data, postProccer), 0)
   }
 }
 
