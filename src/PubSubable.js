@@ -20,28 +20,16 @@ class Subscriber {
   }
 }
 
-class PubSub {
+export default class PubSubable {
   constructor() {
-    const emptyFn = () => {}
     this.subscribers = {}
-    this.beforeSubscribe = emptyFn
-    this.afterSubscribe = emptyFn
-    this.beforePublish = emptyFn
-    this.afterPublish = emptyFn
   }
-  addHooks({ beforeSubscribe, afterSubscribe, beforePublish, afterPublish }) {
-    beforeSubscribe && (this.beforeSubscribe = beforeSubscribe)
-    afterSubscribe && (this.afterSubscribe = afterSubscribe)
-    beforePublish && (this.beforePublish = beforePublish)
-    afterPublish && (this.afterPublish = afterPublish)
-  }
-  removeHooks() {
-    const emptyFn = () => {}
-    this.beforeSubscribe = emptyFn
-    this.afterSubscribe = emptyFn
-    this.beforePublish = emptyFn
-    this.afterPublish = emptyFn
-  }
+  // leave them to be implementes by sub class
+  beforeSubscribe() {}
+  afterSubscribe() {}
+  beforePublish() {}
+  afterPublish() {}
+
   subscribe(eventType, handler) {
     if (this.beforeSubscribe(this, eventType, handler) === false) {
       return null
@@ -61,8 +49,10 @@ class PubSub {
   getSubscribers() {
     return this.subscribers
   }
-  publish(eventType, data) {
-    this.beforePublish(this, eventType, data)
+  publish(eventType, data, callback = () => {}) {
+    if (this.beforePublish(this, eventType, data) === false) {
+      return callback(true, null)
+    }
     const subscriber = this.subscribers[eventType]
     if (typeof subscriber === 'undefined') {
       throw new Error(
@@ -74,13 +64,10 @@ class PubSub {
     for (let listener of listeners) {
       result = listener(data)
       if (isPromise(result)) {
-        result.then(d => this.afterPublish(d))
+        result.then(d => callback(false, this.afterPublish(d)))
       } else {
-        this.afterPublish(result)
+        callback(false, this.afterPublish(result))
       }
     }
   }
 }
-
-const pubsub = new PubSub()
-export default pubsub

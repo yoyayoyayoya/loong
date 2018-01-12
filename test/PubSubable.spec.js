@@ -1,5 +1,6 @@
-import Pubsub from '../src/pubsub'
+import PubSubable from '../src/PubSubable'
 
+const Pubsub = new PubSubable()
 describe('pubsub tests', () => {
   const EVENT_TYPE = 't'
   const NEW_EVENT_TYPE = 't'
@@ -86,14 +87,13 @@ describe('pubsub tests', () => {
         })
       }
       const subscriber = Pubsub.subscribe(ASYNC_EVENT_TYPE, asyncListener)
-      Pubsub.addHooks({
-        afterPublish: data => {
-          expect(data).toBe(newData)
-          Pubsub.removeHooks()
-          done()
-        }
-      })
-      Pubsub.publish(ASYNC_EVENT_TYPE, pubData)
+      const callback = (_, data) => {
+        Pubsub.afterPublish = () => {}
+        expect(data).toBe(newData)
+        done()
+      }
+      Pubsub.afterPublish = d => d
+      Pubsub.publish(ASYNC_EVENT_TYPE, pubData, callback)
       subscriber.unsubscribeAll()
     })
 
@@ -105,76 +105,75 @@ describe('pubsub tests', () => {
   })
 
   describe('when adding hooks', () => {
+    it('should cancel add the subscriber when beforeSubscribe hook returned false', () => {
+      Pubsub.beforeSubscribe = () => false
+      const subscriber = Pubsub.subscribe(EVENT_TYPE, () => {})
+      expect(subscriber).toBeNull()
+      Pubsub.beforeSubscribe = () => {}
+    })
     it('should trigger beforeSubscribe hook', done => {
       const fn = () => {}
-      Pubsub.addHooks({
-        beforeSubscribe: (p, eventType, handler) => {
-          expect(p).toBe(Pubsub)
-          expect(eventType).toBe(EVENT_TYPE)
-          expect(handler).toBe(fn)
-          done()
-        }
-      })
+      Pubsub.beforeSubscribe = (p, eventType, handler) => {
+        expect(p).toBe(Pubsub)
+        expect(eventType).toBe(EVENT_TYPE)
+        expect(handler).toBe(fn)
+        done()
+      }
       const subscriber = Pubsub.subscribe(EVENT_TYPE, fn)
 
       subscriber.unsubscribeAll()
-      Pubsub.removeHooks()
+      Pubsub.beforeSubscribe = () => {}
     })
-    it('should cancel the subscription if beforeSubscribe hook return false', () => {
-      Pubsub.addHooks({
-        beforeSubscribe: (p, eventType, handler) => {
-          return false
-        }
-      })
+    it('should cancel the publishing if beforePublish hook return false', () => {
+      Pubsub.beforePublish = () => false
+      Pubsub.afterPublish = () => {
+        throw new Error('should not be called')
+      }
       const subscriber = Pubsub.subscribe(EVENT_TYPE, null)
-      expect(subscriber).toBeNull()
-      Pubsub.removeHooks()
+      Pubsub.publish(EVENT_TYPE)
+      subscriber.unsubscribeAll()
+      Pubsub.beforePublish = () => {}
+      Pubsub.afterPublish = () => {}
     })
 
     it('should trigger afterSubscribe hook', done => {
       const fn = () => {}
 
-      Pubsub.addHooks({
-        afterSubscribe: (p, eventType, handler) => {
-          expect(p).toBe(Pubsub)
-          expect(eventType).toBe(EVENT_TYPE)
-          expect(handler).toBe(fn)
-          done()
-        }
-      })
+      Pubsub.afterSubscribe = (p, eventType, handler) => {
+        expect(p).toBe(Pubsub)
+        expect(eventType).toBe(EVENT_TYPE)
+        expect(handler).toBe(fn)
+        done()
+      }
       const subscriber = Pubsub.subscribe(EVENT_TYPE, fn)
       subscriber.unsubscribeAll()
-      Pubsub.removeHooks()
+      Pubsub.afterSubscribe = () => {}
     })
 
     it('should trigger beforePublish hook', done => {
       const subscriber = Pubsub.subscribe(EVENT_TYPE, d => d)
       const expectedData = 'data'
-      Pubsub.addHooks({
-        beforePublish: (p, eventType, data) => {
-          expect(p).toBe(Pubsub)
-          expect(eventType).toBe(EVENT_TYPE)
-          expect(data).toBe(expectedData)
-          done()
-        }
-      })
+      Pubsub.beforePublish = (p, eventType, data) => {
+        expect(p).toBe(Pubsub)
+        expect(eventType).toBe(EVENT_TYPE)
+        expect(data).toBe(expectedData)
+        done()
+      }
       Pubsub.publish(EVENT_TYPE, expectedData)
       subscriber.unsubscribeAll()
-      Pubsub.removeHooks()
+      Pubsub.beforePublish = () => {}
     })
 
     it('should trigger afterPublish hook', done => {
       const subscriber = Pubsub.subscribe(EVENT_TYPE, d => d)
       const expectedData = 'data'
-      Pubsub.addHooks({
-        afterPublish: data => {
-          expect(data).toBe(expectedData)
-          done()
-        }
-      })
+      Pubsub.afterPublish = data => {
+        expect(data).toBe(expectedData)
+        done()
+      }
       Pubsub.publish(EVENT_TYPE, expectedData)
       subscriber.unsubscribeAll()
-      Pubsub.removeHooks()
+      Pubsub.afterPublish = () => {}
     })
   })
 })

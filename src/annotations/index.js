@@ -1,3 +1,3 @@
-import Subscribe from './Subscribe'
+import Event from './Event'
 
-export { Subscribe }
+export { Event }

@@ -1,34 +1,40 @@
-import { Subscribe } from '../../src/index'
+import Model from '../../src/Model'
+import Event from '../../src/annotations/Event'
 import { ADD_TODO, COMPLETE_TODO, UNDO_TODO, REMOVE_TODO } from './TodoEvents'
 
-class TodoModel {
+class TodoModel extends Model {
   constructor() {
+    super()
     this.todos = []
   }
-  @Subscribe(ADD_TODO)
+  @Event(ADD_TODO)
   add(todo) {
     this.todos.push(todo)
     return this
   }
 
-  @Subscribe(COMPLETE_TODO)
+  @Event(COMPLETE_TODO)
   complete(todoId) {
     const todo = this.todos.find(t => t.id === todoId)
-    todo.isCompleted = true
+    todo && (todo.isCompleted = true)
     return this
   }
 
-  @Subscribe(UNDO_TODO)
+  @Event(UNDO_TODO)
   undo(todoId) {
     const todo = this.todos.find(t => t.id === todoId)
-    todo.isCompleted = false
+    todo && (todo.isCompleted = false)
     return this
   }
 
-  @Subscribe(REMOVE_TODO)
+  @Event(REMOVE_TODO)
   remove(todoId) {
     this.todos = this.todos.filter(todo => todo.id !== todoId)
     return this
+  }
+
+  clean() {
+    this.todos = []
   }
 }
 
