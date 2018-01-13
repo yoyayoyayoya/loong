@@ -1,10 +1,10 @@
-import TodosModel from '../mock/TodosModel'
+import { TodosModel } from '../models'
 import {
   ADD_TODO,
   COMPLETE_TODO,
   UNDO_TODO,
   REMOVE_TODO
-} from '../mock/TodoEvents'
+} from '../models/TodoEvents'
 
 describe('Annotation: Subscribe ', () => {
   describe('TestModel', () => {

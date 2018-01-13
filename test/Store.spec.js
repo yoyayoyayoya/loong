@@ -1,10 +1,10 @@
-import TodosModel from './mock/TodosModel'
+import { TodosModel } from './models'
 import {
   ADD_TODO,
   COMPLETE_TODO,
   UNDO_TODO,
   REMOVE_TODO
-} from './mock/TodoEvents'
+} from './models/TodoEvents'
 import Store from '../src/Store'
 
 describe('Store tests', () => {
@@ -21,10 +21,10 @@ describe('Store tests', () => {
       expect(state.todos).toBeDefined()
       expect(state.todos).toEqual(expect.arrayContaining(['a']))
     })
-    it('should get the subscribers from TodoModel', () => {
+    it('should get the event handlers from TodoModel', () => {
       const store = new Store({}, { TodosModel })
-      const subscribers = store.getSubscribers()
-      const events = Object.keys(subscribers)
+      const eventListeners = store.getEventListeners()
+      const events = Object.keys(eventListeners)
       const expectedEvents = [ADD_TODO, COMPLETE_TODO, UNDO_TODO, REMOVE_TODO]
       expect(events).toEqual(expect.arrayContaining(expectedEvents))
     })
@@ -39,15 +39,22 @@ describe('Store tests', () => {
 
   describe('publish the todo data { id: 1, text: "test" } for ADD_TODO event in store', () => {
     const data = { id: 1, text: 'test' }
-    it('should get the merged new state', () => {
+    it('should be handled by TodosModel and get the merged new state', () => {
       TodosModel.clean()
       const store = new Store({}, { TodosModel })
       const state = store.getState()
       expect(state.todos).toHaveLength(0)
+      let res = null
+      const addTodoSubscriber = data => {
+        res = data
+      }
+      store.subscribe(ADD_TODO, addTodoSubscriber)
       store.publish(ADD_TODO, data)
       const newState = store.getState()
       expect(newState.todos).toHaveLength(1)
       expect(newState.todos[0]).toEqual(data)
+      expect(res.todos).toHaveLength(1)
+      expect(res.todos[0]).toEqual(data)
     })
   })
 })

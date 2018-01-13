@@ -1,5 +1,5 @@
 import Model from '../../src/Model'
-import Event from '../../src/annotations/Event'
+import Listen from '../../src/annotations/Listen'
 import { ADD_TODO, COMPLETE_TODO, UNDO_TODO, REMOVE_TODO } from './TodoEvents'
 
 class TodoModel extends Model {
@@ -7,27 +7,27 @@ class TodoModel extends Model {
     super()
     this.todos = []
   }
-  @Event(ADD_TODO)
+  @Listen(ADD_TODO)
   add(todo) {
     this.todos.push(todo)
     return this
   }
 
-  @Event(COMPLETE_TODO)
+  @Listen(COMPLETE_TODO)
   complete(todoId) {
     const todo = this.todos.find(t => t.id === todoId)
     todo && (todo.isCompleted = true)
     return this
   }
 
-  @Event(UNDO_TODO)
+  @Listen(UNDO_TODO)
   undo(todoId) {
     const todo = this.todos.find(t => t.id === todoId)
     todo && (todo.isCompleted = false)
     return this
   }
 
-  @Event(REMOVE_TODO)
+  @Listen(REMOVE_TODO)
   remove(todoId) {
     this.todos = this.todos.filter(todo => todo.id !== todoId)
     return this

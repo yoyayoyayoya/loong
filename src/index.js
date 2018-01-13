@@ -1,4 +1,5 @@
 import createStore from './createStore'
-import { Subscribe } from './annotations/index'
+import { Listen } from './annotations'
+import Model from './Model'
 
-export { createStore, Subscribe }
+export { createStore, Listen, Model }
