@@ -1,4 +1,5 @@
 import nodeResolve from 'rollup-plugin-node-resolve'
+import localResolve from 'rollup-plugin-local-resolve'
 import babel from 'rollup-plugin-babel'
 import replace from 'rollup-plugin-replace'
 import uglify from 'rollup-plugin-uglify'
@@ -12,6 +13,7 @@ const config = {
 if (env === 'es' || env === 'cjs') {
   config.output = { format: env }
   config.plugins.push(
+    localResolve(),
     babel({
       plugins: ['external-helpers']
     })
@@ -23,6 +25,7 @@ if (env === 'development' || env === 'production') {
   config.name = 'yoya'
   config.plugins.push(
     nodeResolve({
+      main: true,
       jsnext: true
     }),
     babel({

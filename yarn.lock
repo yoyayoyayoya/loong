@@ -3821,6 +3821,10 @@ rollup-plugin-babel@^3.0.3:
   dependencies:
     rollup-pluginutils "^1.5.0"
 
+rollup-plugin-local-resolve@^1.0.7:
+  version "1.0.7"
+  resolved "http://registry.npm.taobao.org/rollup-plugin-local-resolve/download/rollup-plugin-local-resolve-1.0.7.tgz#c486701716c15add2127565c2eaa101123320887"
+
 rollup-plugin-node-resolve@^3.0.0:
   version "3.0.0"
   resolved "http://registry.npm.taobao.org/rollup-plugin-node-resolve/download/rollup-plugin-node-resolve-3.0.0.tgz#8b897c4c3030d5001277b0514b25d2ca09683ee0"
