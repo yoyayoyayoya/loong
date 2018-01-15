@@ -4,7 +4,7 @@ const Pubsub = new PubSubable()
 describe('pubsub tests', () => {
   const EVENT_TYPE = 't'
   const NEW_EVENT_TYPE = 't'
-  const ASYNC_EVENT_TYPE = 'a'
+
   describe(`when subscribe the EVENT_TYPE:${EVENT_TYPE}`, () => {
     it('should create the subscribeTotype, name, listener after subscription and could unsubscribe it', () => {
       const fn1 = () => {}
@@ -74,27 +74,6 @@ describe('pubsub tests', () => {
 
       res1.subscriber.unsubscribeAll()
       res2.subscriber.unsubscribeAll()
-    })
-
-    it('should handle the async listener', done => {
-      const pubData = 'data'
-      const newData = 'new async data'
-      const asyncListener = data => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            resolve(newData)
-          }, 10)
-        })
-      }
-      const subscriber = Pubsub.subscribe(ASYNC_EVENT_TYPE, asyncListener)
-      const callback = (_, data) => {
-        Pubsub.afterPublish = () => {}
-        expect(data).toBe(newData)
-        done()
-      }
-      Pubsub.afterPublish = d => d
-      Pubsub.publish(ASYNC_EVENT_TYPE, pubData, callback)
-      subscriber.unsubscribeAll()
     })
 
     it('should throw error if the subscriber is not existed', () => {

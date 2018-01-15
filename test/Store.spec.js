@@ -1,6 +1,7 @@
 import { TodosModel } from './models'
 import {
   ADD_TODO,
+  ASYNC_ADD_TODO,
   COMPLETE_TODO,
   UNDO_TODO,
   REMOVE_TODO
@@ -8,6 +9,7 @@ import {
 import Store from '../src/Store'
 
 describe('Store tests', () => {
+  TodosModel.clean()
   describe('create a store with initState and single model', () => {
     it('should get the state "todos" from store', () => {
       const store = new Store({ value: 'value' }, { TodosModel })
@@ -35,26 +37,52 @@ describe('Store tests', () => {
         expect(subscribers[event].getListeners()[0]({})).toBe(TodosModel)
       }
     })
+    describe('publish the todo data { id: 1, text: "test" } for ADD_TODO event in store', () => {
+      const data = { id: 1, text: 'test' }
+      it('should be handled by TodosModel and get the merged new state', () => {
+        TodosModel.clean()
+        const store = new Store({}, { TodosModel })
+        const state = store.getState()
+        expect(state.todos).toHaveLength(0)
+        let res = null
+        const addTodoSubscriber = data => {
+          res = data
+        }
+        store.subscribe(ADD_TODO, addTodoSubscriber)
+        store.publish(ADD_TODO, data)
+        const newState = store.getState()
+        expect(newState.todos).toHaveLength(1)
+        expect(newState.todos[0]).toEqual(data)
+        expect(res.todos).toHaveLength(1)
+        expect(res.todos[0]).toEqual(data)
+      })
+      it('should handle the async add event', done => {
+        TodosModel.clean()
+        const store = new Store({}, { TodosModel })
+        const asyncListener = data => {
+          const newState = store.getState()
+          expect(newState.todos).toHaveLength(1)
+          expect(newState.todos[0].text).toEqual('todo')
+          expect(data.todos).toHaveLength(1)
+          expect(data.todos[0].text).toEqual('todo')
+          done()
+        }
+        store.subscribe(ASYNC_ADD_TODO, asyncListener)
+        store.publish(ASYNC_ADD_TODO, { text: 'todo' })
+      })
+    })
   })
-
-  describe('publish the todo data { id: 1, text: "test" } for ADD_TODO event in store', () => {
-    const data = { id: 1, text: 'test' }
-    it('should be handled by TodosModel and get the merged new state', () => {
-      TodosModel.clean()
-      const store = new Store({}, { TodosModel })
-      const state = store.getState()
-      expect(state.todos).toHaveLength(0)
-      let res = null
-      const addTodoSubscriber = data => {
-        res = data
+  describe('create a store without model', () => {
+    it('should send the data to subscribers without any event listener', () => {
+      const store = new Store()
+      let expectedData = null
+      const subscriber = data => {
+        expectedData = data
       }
-      store.subscribe(ADD_TODO, addTodoSubscriber)
-      store.publish(ADD_TODO, data)
-      const newState = store.getState()
-      expect(newState.todos).toHaveLength(1)
-      expect(newState.todos[0]).toEqual(data)
-      expect(res.todos).toHaveLength(1)
-      expect(res.todos[0]).toEqual(data)
+      const EVENT = 'e'
+      store.subscribe(EVENT, subscriber)
+      store.publish(EVENT, { name: 'name' })
+      expect(expectedData.name).toEqual('name')
     })
   })
 })

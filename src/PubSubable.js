@@ -28,7 +28,9 @@ export default class PubSubable {
   beforeSubscribe() {}
   afterSubscribe() {}
   beforePublish() {}
-  afterPublish() {}
+  afterPublish(data) {
+    return data
+  }
 
   subscribe(eventType, handler) {
     if (this.beforeSubscribe(this, eventType, handler) === false) {
@@ -49,6 +51,15 @@ export default class PubSubable {
   getSubscribers() {
     return this.subscribers
   }
+  /**
+   *
+   *
+   * @param {Function(isPublishStoped, data)} callback
+   * a data hook for publish, will pass the below params:
+   * --
+   *   isPublishStoped: indicate if current publish action is stoped
+   *   data: the data handled by model
+   */
   publish(eventType, data, callback = () => {}) {
     if (this.beforePublish(this, eventType, data) === false) {
       return callback(true, null)
@@ -60,13 +71,21 @@ export default class PubSubable {
       )
     }
     const listeners = subscriber.getListeners()
-    let result = null
+
     for (let listener of listeners) {
-      result = listener(data)
-      if (isPromise(result)) {
-        result.then(d => callback(false, this.afterPublish(d)))
+      /**
+       * the data is handled by model. it could be the promise object
+       */
+      if (isPromise(data)) {
+        data.then(d => {
+          this.afterPublish(d)
+          listener(d)
+          callback(false, d)
+        })
       } else {
-        callback(false, this.afterPublish(result))
+        this.afterPublish(data)
+        listener(data)
+        callback(false, data)
       }
     }
   }
