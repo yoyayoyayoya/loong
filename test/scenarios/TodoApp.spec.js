@@ -11,7 +11,7 @@ import { createStore } from '../../src'
 
 describe('Mocking Todos App Tests', () => {
   TodosModel.clean()
-  const store = createStore({}, { TodosModel })
+  const store = createStore({ models: { TodosModel } })
   let componentState = {}
   //mock the TodoList components
   const TodoList = state => {

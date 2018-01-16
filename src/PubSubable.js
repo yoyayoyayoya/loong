@@ -1,4 +1,4 @@
-const isPromise = require('is-promise')
+import PluginExecutable from './PluginExecutable'
 
 class Subscriber {
   constructor(eventType, handler) {
@@ -20,22 +20,13 @@ class Subscriber {
   }
 }
 
-export default class PubSubable {
-  constructor() {
+export default class PubSubable extends PluginExecutable {
+  constructor({ plugins = [] } = {}) {
+    super(plugins)
     this.subscribers = {}
-  }
-  // leave them to be implementes by sub class
-  beforeSubscribe() {}
-  afterSubscribe() {}
-  beforePublish() {}
-  afterPublish(data) {
-    return data
   }
 
   subscribe(eventType, handler) {
-    if (this.beforeSubscribe(this, eventType, handler) === false) {
-      return null
-    }
     let subscriber = this.subscribers[eventType]
     if (subscriber) {
       subscriber.addListener(handler)
@@ -45,7 +36,6 @@ export default class PubSubable {
         handler
       )
     }
-    this.afterSubscribe(this, eventType, handler)
     return subscriber
   }
   getSubscribers() {
@@ -60,10 +50,7 @@ export default class PubSubable {
    *   isPublishStoped: indicate if current publish action is stoped
    *   data: the data handled by model
    */
-  publish(eventType, data, callback = () => {}) {
-    if (this.beforePublish(this, eventType, data) === false) {
-      return callback(true, null)
-    }
+  publish(eventType, data) {
     const subscriber = this.subscribers[eventType]
     if (typeof subscriber === 'undefined') {
       throw new Error(
@@ -73,20 +60,7 @@ export default class PubSubable {
     const listeners = subscriber.getListeners()
 
     for (let listener of listeners) {
-      /**
-       * the data is handled by model. it could be the promise object
-       */
-      if (isPromise(data)) {
-        data.then(d => {
-          this.afterPublish(d)
-          listener(d)
-          callback(false, d)
-        })
-      } else {
-        this.afterPublish(data)
-        listener(data)
-        callback(false, data)
-      }
+      listener(data)
     }
   }
 }

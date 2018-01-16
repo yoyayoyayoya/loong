@@ -1,8 +1,9 @@
 import PubSubable from './PubSubable'
+const isPromise = require('is-promise')
 
 export default class Store extends PubSubable {
-  constructor(initState = {}, models = {}) {
-    super()
+  constructor({ initState = {}, models = {}, plugins = [] } = {}) {
+    super({ plugins })
     this.state = this.intiStateFromModels(initState, models)
     this.models = models
     this.injectPublishMethodToModels(this.models)
@@ -68,6 +69,15 @@ export default class Store extends PubSubable {
     return this.state
   }
 
+  subscribe(eventType, data) {
+    if (this.beforeSubscribe(eventType, data) === false) {
+      this.afterSubscribe(eventType, data)
+      return
+    }
+    super.subscribe(eventType, data)
+    this.afterSubscribe(eventType, data)
+  }
+
   /**
    * The models in charge of handling event data, and then trasport them to the
    * subscribers of event. We override the parent publish method so that the
@@ -80,12 +90,24 @@ export default class Store extends PubSubable {
    * another chance to get the new state
    */
   publish(eventType, data, callback = () => {}) {
+    if (this.beforePublish(eventType, data) === false) {
+      this.afterPublish(eventType, data)
+      return
+    }
+    const me = this
     const newData = this.handlerEventByModel(eventType, data)
-    super.publish(eventType, newData, callback)
-  }
-
-  afterPublish(newState) {
-    this.state = Object.assign(this.state, newState)
-    return this
+    if (isPromise(newData)) {
+      newData.then(d => {
+        me.state = Object.assign(this.state, d)
+        callback(me.state)
+        super.publish(eventType, d, callback)
+        me.afterPublish(eventType, { data, newData: d })
+      })
+    } else {
+      me.state = Object.assign(this.state, newData)
+      callback(me.state)
+      super.publish(eventType, newData, callback)
+      me.afterPublish(eventType, { data, newData })
+    }
   }
 }
