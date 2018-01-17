@@ -1,6 +1,6 @@
 {
   "name": "loong",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "description": "The lib for model based state management",
   "main": "lib/index.js",
   "author": "Yoya <yoya_yoya_yoya@icloud.com>(https://github.com/yoyayoyayoya)",
