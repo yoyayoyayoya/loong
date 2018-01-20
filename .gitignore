@@ -5,4 +5,7 @@ dist
 lib
 es
 coverage
+coverage.lcov
 _book
+npm-debug.log
+.nyc_output

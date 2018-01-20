@@ -5,7 +5,9 @@ before_install:
   - npm i -g npm
 script:
   - npm run lint
-  - npm run test
+  - npm run test:cov
+after_success:
+  - npm run coverage
 branches:
   only:
     - master
