@@ -1,6 +1,6 @@
 {
   "name": "loong",
-  "version": "0.14.2",
+  "version": "0.14.3",
   "description": "The lib for model based state management",
   "main": "lib/loong.js",
   "module": "es/loong.js",
@@ -38,7 +38,8 @@
     "test:cov": "npm test -- --coverage",
     "coverage": "npm test -- --coverage > coverage.lcov && codecov",
     "test:watch": "npm test -- --watch",
-    "precommit": "npm test && lint-staged"
+    "precommit": "npm test && lint-staged",
+    "publish": "npm build && npm publish"
   },
   "npmName": "loong",
   "npmFileMap": [

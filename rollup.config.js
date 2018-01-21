@@ -7,11 +7,14 @@ import uglify from 'rollup-plugin-uglify'
 const env = process.env.NODE_ENV
 const config = {
   input: 'src/index.js',
-  plugins: []
+  plugins: [],
+  output: {
+    name: 'Loong'
+  }
 }
 
 if (env === 'es' || env === 'cjs') {
-  config.output = { format: env }
+  config.output.format = env
   config.plugins.push(
     localResolve(),
     babel({
@@ -21,8 +24,7 @@ if (env === 'es' || env === 'cjs') {
 }
 
 if (env === 'development' || env === 'production') {
-  config.output = { format: 'umd' }
-  config.name = 'Loong'
+  config.output.format = 'umd'
   config.plugins.push(
     nodeResolve({
       main: true,
