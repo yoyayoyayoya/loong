@@ -42,20 +42,15 @@ export default class PubSubable extends PluginExecutable {
     return this.subscribers
   }
   /**
+   * Publish the data to the listeners of eventType subscriber
    *
-   *
-   * @param {Function(isPublishStoped, data)} callback
-   * a data hook for publish, will pass the below params:
-   * --
-   *   isPublishStoped: indicate if current publish action is stoped
-   *   data: the data handled by model
+   * @param {String} eventType
+   * @param {Object} data
    */
   publish(eventType, data) {
     const subscriber = this.subscribers[eventType]
     if (typeof subscriber === 'undefined') {
-      throw new Error(
-        `Could not find the related listener for event: ${eventType}`
-      )
+      return
     }
     const listeners = subscriber.getListeners()
 

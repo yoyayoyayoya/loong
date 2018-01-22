@@ -4,7 +4,9 @@ import {
   ASYNC_ADD_TODO,
   COMPLETE_TODO,
   UNDO_TODO,
-  REMOVE_TODO
+  REMOVE_TODO,
+  TODOS_CHANGE,
+  FIRE_CHANGE
 } from './models/TodoEvents'
 import Store from '../src/Store'
 
@@ -75,6 +77,30 @@ describe('Store tests', () => {
         }
         store.subscribe(ASYNC_ADD_TODO, asyncListener)
         store.publish(ASYNC_ADD_TODO, { text: 'todo' })
+      })
+    })
+
+    describe('the model listener returns the special data with eventType', () => {
+      const store = new Store({
+        initState: { value: 'value', todos: ['a'] },
+        models: { TodosModel }
+      })
+
+      it('should republish the data with returned eventType', done => {
+        let subscriber = store.subscribe(TODOS_CHANGE, data => {
+          expect(data).toEqual('value')
+          subscriber.unsubscribeAll()
+          done()
+        })
+        store.publish(FIRE_CHANGE, { data: 'value' })
+      })
+      it('should republish the async data with returned eventType', done => {
+        let subscriber = store.subscribe(TODOS_CHANGE, data => {
+          expect(data).toEqual('value')
+          subscriber.unsubscribeAll()
+          done()
+        })
+        store.publish(FIRE_CHANGE, { isAsync: true, data: 'value' })
       })
     })
   })

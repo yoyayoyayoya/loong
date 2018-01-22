@@ -7,7 +7,9 @@ import {
   COMPLETE_TODO,
   UNDO_TODO,
   REMOVE_TODO,
-  FILTER_TODOS
+  FILTER_TODOS,
+  TODOS_CHANGE,
+  FIRE_CHANGE
 } from './TodoEvents'
 
 class TodoModel extends Model {
@@ -85,6 +87,29 @@ class TodoModel extends Model {
       return todo.text.indexOf(q) > -1
     })
     return { todos: res }
+  }
+
+  @Listen(FIRE_CHANGE)
+  fireChange(data) {
+    const res = { eventType: TODOS_CHANGE, data: data.data }
+    if (data.isAsync) {
+      return new Promise((resolve, reject) => {
+        try {
+          setTimeout(() => {
+            resolve(res)
+          }, 0)
+        } catch (e) {
+          reject(e)
+        }
+      })
+    } else {
+      return res
+    }
+  }
+
+  @Listen(TODOS_CHANGE)
+  listenChange(data) {
+    return data
   }
 
   clean() {

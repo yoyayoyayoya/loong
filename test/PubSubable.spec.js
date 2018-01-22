@@ -75,11 +75,5 @@ describe('pubsub tests', () => {
       res1.subscriber.unsubscribeAll()
       res2.subscriber.unsubscribeAll()
     })
-
-    it('should throw error if the subscriber is not existed', () => {
-      expect(() => {
-        Pubsub.publish('unkown_type', null)
-      }).toThrow()
-    })
   })
 })

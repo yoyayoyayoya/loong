@@ -74,8 +74,9 @@ export default class Store extends PubSubable {
       this.afterSubscribe(eventType, data)
       return
     }
-    super.subscribe(eventType, data)
+    let subscriber = super.subscribe(eventType, data)
     this.afterSubscribe(eventType, data)
+    return subscriber
   }
 
   /**
@@ -96,14 +97,26 @@ export default class Store extends PubSubable {
     }
     const me = this
     const newData = this.handlerEventByModel(eventType, data)
+
+    /**
+     * if the property 'eventType' in the newData, it means that there is a new
+     * event should be republished.
+     */
+
     if (isPromise(newData)) {
       newData.then(d => {
+        if (d.eventType) {
+          return me.publish(d.eventType, d.data, callback)
+        }
         me.state = Object.assign(this.state, d)
         callback(me.state)
         super.publish(eventType, d, callback)
         me.afterPublish(eventType, { data, newData: d })
       })
     } else {
+      if (newData.eventType) {
+        return me.publish(newData.eventType, newData.data, callback)
+      }
       me.state = Object.assign(this.state, newData)
       callback(me.state)
       super.publish(eventType, newData, callback)
