@@ -66,12 +66,6 @@ export default class Todos extends Model {
 
   @Listen(CLEAR_COMPLETED)
   clearCompleted() {
-    // this.todos = this.todos.map(todo => {
-    //   if (todo.id === id) {
-    //     return { ...todo, completed: false }
-    //   }
-    //   return todo
-    // })
     return { todos: this.todos.filter(todo => !todo.completed) }
   }
 
