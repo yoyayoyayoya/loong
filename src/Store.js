@@ -105,7 +105,7 @@ export default class Store extends PubSubable {
 
     if (isPromise(newData)) {
       newData.then(d => {
-        if (d.eventType) {
+        if (d && d.eventType) {
           return me.publish(d.eventType, d.data, callback)
         }
         me.state = Object.assign(this.state, d)
@@ -114,7 +114,7 @@ export default class Store extends PubSubable {
         me.afterPublish(eventType, { data, newData: d })
       })
     } else {
-      if (newData.eventType) {
+      if (newData && newData.eventType) {
         return me.publish(newData.eventType, newData.data, callback)
       }
       me.state = Object.assign(this.state, newData)
