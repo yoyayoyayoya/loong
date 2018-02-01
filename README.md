@@ -52,7 +52,7 @@ Currently I implemented a tool for React..
 
 ## Plugins (coming soon)
 
-### Install
+## Install
 
 ```bash
 > npm install --save loong react-loong
@@ -60,7 +60,7 @@ or
 > yarn add loong react-loong
 ```
 
-### How to use it
+## How to use it
 
 (1). Create a model extends the Model class.  
 (2). Define the states in the model. it is very simple. The properties are just the states.  
@@ -160,7 +160,7 @@ class TodoComponent extends React.Component{
 
 (9). Ready to go!
 
-### Example
+## Example
 
 You can get the more details and usages in here.
 [TodoMvc](https://github.com/yoyayoyayoya/loong/tree/master/examples/todomvc)
