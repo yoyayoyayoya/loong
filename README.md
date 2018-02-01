@@ -19,9 +19,10 @@ It is a Redux alike lib followd the flex pattern. The different part is it based
 
 ## Conecpts
 
-* [Pub/Sub pattern](#Pub\/Sub pattern)
-* [Event](#Event)
-* [Model](#Model)
+* [Pub/Sub pattern](#pubsub-pattern)
+* [Event](#event)
+* [Model](#model)
+* [Plugins](#plugins)
 
 ### Pub/Sub pattern
 
